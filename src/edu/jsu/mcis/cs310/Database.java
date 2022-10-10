@@ -3,7 +3,6 @@ package edu.jsu.mcis.cs310;
 import java.sql.*;
 import org.json.simple.*;
 import org.json.simple.parser.*;
-import java.util.*;
 
 public class Database {
 
@@ -26,9 +25,6 @@ public class Database {
         PreparedStatement psm = null;
         ResultSet rset = null;
 
-        JSONArray jsonArray = new JSONArray();
-        JSONObject row = new JSONObject();
-
         try {
             psm = this.connection.prepareStatement(query);
 
@@ -40,21 +36,8 @@ public class Database {
 
             if (hasResults) {
                 rset = psm.getResultSet();
-                
-                result = getResultSetAsJSON(rset);
 
-//                while (rset.next()) {
-//                    ResultSetMetaData meta = rset.getMetaData();
-//                    int cols = meta.getColumnCount();
-//
-//                    for (int k = 1; k <= cols; ++k) {
-//                        String columnname = meta.getColumnName(k);
-//                        row.put(columnname, rset.getObject(columnname));
-//
-//                    }
-//
-//                    jsonArray.add(row);
-//                }
+                result = getResultSetAsJSON(rset);
 
             }
         } catch (SQLException e) {
@@ -113,7 +96,7 @@ public class Database {
             }
 
         }
-        
+
         return result;
 
     }
@@ -134,7 +117,7 @@ public class Database {
             psm.setInt(3, crn);
 
             result = psm.executeUpdate();
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -166,7 +149,7 @@ public class Database {
             psm.setInt(2, termid);
 
             result = psm.executeUpdate();
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -178,7 +161,7 @@ public class Database {
                 }
             }
         }
-        
+
         return result;
 
     }
@@ -191,8 +174,6 @@ public class Database {
         PreparedStatement psm = null;
         ResultSet rset = null;
 
-        JSONArray jsonArray = new JSONArray();
-
         try {
             psm = this.connection.prepareStatement(query);
 
@@ -204,27 +185,10 @@ public class Database {
             if (hasResults) {
                 rset = psm.getResultSet();
 
-                while (rset.next()) {
-                    ResultSetMetaData meta = rset.getMetaData();
-                    int cols = meta.getColumnCount();
-                    System.out.println("here" + rset.getObject("crn"));
-                    
-                    JSONObject row = new JSONObject();
-
-                    
-                    for (int k = 1; k <= cols; ++k) {
-                        String columnname = meta.getColumnName(k);
-                        
-                        row.put(columnname, rset.getObject(columnname).toString());
-                        
-                    }
-                    
-                    jsonArray.add(row);
-                }
+                result = getResultSetAsJSON(rset);
 
             }
-            
-            result = JSONValue.toJSONString(jsonArray);
+
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -247,8 +211,6 @@ public class Database {
 
         }
 
-        
-        System.out.println(result);
         return result;
 
     }
@@ -329,34 +291,32 @@ public class Database {
 
     private String getResultSetAsJSON(ResultSet resultset) {
 
-         
         String result;
-        
+
         /* Create JSON Containers */
-        
         JSONArray json = new JSONArray();
-        JSONArray keys = new JSONArray();
-        
+
         try {
-            
+
             /* Get Metadata */
-        
             ResultSetMetaData metadata = resultset.getMetaData();
             int columnCount = metadata.getColumnCount();
-            
-            
+
             while (resultset.next()) {
-                JSONObject obj = new JSONObject();
-                for (int i = 0; i < columnCount; i++) {
-                    obj.put(metadata.getColumnLabel(i + 1).toLowerCase(), resultset.getObject(i + 1).toString());
+                JSONObject row = new JSONObject();
+
+                for (int k = 1; k <= columnCount; ++k) {
+                    String columnname = metadata.getColumnName(k);
+                    row.put(columnname, resultset.getObject(k).toString());
+
                 }
-                json.add(obj);
+                json.add(row);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        catch (Exception e) { e.printStackTrace(); }
-        
+
         /* Encode JSON Data and Return */
-        
         result = JSONValue.toJSONString(json);
         return result;
 
