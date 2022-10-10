@@ -25,7 +25,7 @@ public class CourseRegistrationDatabaseTest {
     @Before
     public void setUp() {
         
-        db = new Database("cs310_p2_user", "P2!user", "localhost");
+        db = new Database("root", "fiji@", "localhost");
         
     }
     
